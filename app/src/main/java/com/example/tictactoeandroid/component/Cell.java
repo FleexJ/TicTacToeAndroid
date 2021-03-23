@@ -29,6 +29,14 @@ public class Cell {
         });
     }
 
+    public int getRow() {
+        return row;
+    }
+
+    public int getCol() {
+        return col;
+    }
+
     public String getText() {
         return String.valueOf(button.getText());
     }
@@ -54,5 +62,9 @@ public class Cell {
         return this.button.getText().equals(
                 cell.button.getText()
         );
+    }
+
+    public boolean equals(String string) {
+        return this.getText().equals(string);
     }
 }
