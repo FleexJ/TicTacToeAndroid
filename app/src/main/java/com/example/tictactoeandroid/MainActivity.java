@@ -128,12 +128,15 @@ public class MainActivity extends Activity {
         int j = xStart + xStep;
         for (int k = 1; k < 3; k++) {
             Cell cell = cells[i][j];
+            //Если встретилась последовательность одинаковых непустых ячеек
             if (saved.equals(cell) && !saved.isEmpty())
                 count++;
+            //Если они отличаются
             else {
                 saved = cell;
                 count = 1;
             }
+            //Если победная комбинация, то вызываем exception с данными победителя
             if (count == 3)
                 throw new GotWinnerException(saved.getText());
             i += yStep;
@@ -143,6 +146,7 @@ public class MainActivity extends Activity {
 
     //Ход бота
     public void botAction() {
+        //Проверяем чей ход, чтобы определить свою сторону
         if (move % 2 == 0) {
             Cell cell = scanBotOnStep(zero, cross);
             action(cell.getRow(), cell.getCol());
@@ -191,7 +195,7 @@ public class MainActivity extends Activity {
                 return cell;
             }
         }
-        //Попытка заблокировать победу крестика
+        //Попытка заблокировать победу врага
         //scan left diagonal
         cell = scanLineOnStep(0, 0, 1, 1, 2, enemy, false);
         if (cell != null) {
@@ -253,7 +257,7 @@ public class MainActivity extends Activity {
     * xStep - шаг по оси X
     * yStep - шаг по оси Y
     * player - тип подсчитываемых последовательных ячеек(cross|zero)
-    * countEmpty - логическая переменная, отвечает за подсчет пустых ячеек(считать их или нет)
+    * countEmpty - логическая переменная, отвечает за подсчет пустых ячеек(считать их или нет), нужна для выгодного хода, когдв не удалось заблокировать или выиграть
     */
     protected Cell scanLineOnStep(int xStart, int yStart, int xStep, int yStep, int count, String player, boolean countEmpty) {
         int k = 0;
@@ -263,17 +267,23 @@ public class MainActivity extends Activity {
 
         for (int c = 0; c < 3; c++) {
             Cell cell = cells[i][j];
+            //Если встретилась пустая ячейка, запоминаем ее
             if (cell.isEmpty()) {
                 result = cell;
+                //Если нужно их считать
                 if (countEmpty)
                     k++;
             }
             else
+                //Если идет последовательность одинаковых непустых клеток, то считаем ее длину
                 if (cell.equals(player)) {
                     k++;
-                } else {
+                }
+                //Если встретилась другая клетка, то обнуляем счет
+                else {
                     k = 0;
                 }
+            //Если найдена оптимальная ячейка для хода, то возвращаем ее
             if (k == count && result != null) {
                 return result;
             }
