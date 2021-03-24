@@ -17,7 +17,6 @@ public class Cell {
     private int row;
     private int col;
 
-    //TODO изменение цвета букв
     public Cell(Button button, final int row, final int col, final MainActivity activity) {
         this.button = button;
         this.row = row;
@@ -48,13 +47,13 @@ public class Cell {
         button.setText(text);
     }
 
-    public void setColor(int color) {
-        button.setBackgroundColor(color);
+    public void setTextColor(int color) {
+        button.setTextColor(color);
     }
 
     public void clear() {
         button.setText("");
-//        button.setBackgroundColor();
+        button.setTextColor(Color.DKGRAY);
     }
 
     public boolean isEmpty() {

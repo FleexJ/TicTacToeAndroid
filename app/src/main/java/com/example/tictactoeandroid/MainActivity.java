@@ -3,6 +3,7 @@ package com.example.tictactoeandroid;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -24,8 +25,8 @@ public class MainActivity extends Activity {
     private Cell[][] cells = new Cell[3][3];
     public static String cross = "X";
     public static String zero = "0";
+    private LinkedList<Cell> cellLinkedList = new LinkedList<>();
 
-    //TODO изменение цвета текста
     private TextView textStatus;
     private Switch switchMode;
 
@@ -38,8 +39,9 @@ public class MainActivity extends Activity {
         switchMode.setChecked(true);
 
         textStatus = findViewById(R.id.textStatus);
+        int color = getResources().getColor(R.color.colorCross);
         String status = getString(R.string.textStatus_step) + " " + cross;
-        textStatus.setText(status);
+        updateStatus(status, color);
 
         cells[0][0] = new Cell( (Button)findViewById(R.id.buttonCell0_0), 0, 0, this);
         cells[0][1] = new Cell( (Button)findViewById(R.id.buttonCell0_1), 0, 1, this);
@@ -58,6 +60,11 @@ public class MainActivity extends Activity {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
+    public void updateStatus(String text, int color) {
+        textStatus.setTextColor(color);
+        textStatus.setText(text);
+    }
+
     public void action(int row, int col) {
         //Если игра окончена
         if (!winner.isEmpty())
@@ -66,14 +73,23 @@ public class MainActivity extends Activity {
         if (cells[row][col].isEmpty()) {
             if (move % 2 != 0) {
                 cells[row][col].setText(cross);
+                int color = getResources().getColor(R.color.colorCross);
+                cells[row][col].setTextColor(color);
                 String status = getString(R.string.textStatus_step) + " " + zero;
-                textStatus.setText(status);
+                color = getResources().getColor(R.color.colorZero);
+                updateStatus(status, color);
+                cellLinkedList.add(cells[row][col]);
                 Log.v("Step", "\n" + cross + "\trow: " + row + "\tcol: " + col);
             }
             else {
                 cells[row][col].setText(zero);
+                int color = getResources().getColor(R.color.colorZero);
+                cells[row][col].setTextColor(color);
+                cells[row][col].setTextColor(Color.RED);
                 String status = getString(R.string.textStatus_step) + " " + cross;
-                textStatus.setText(status);
+                color = getResources().getColor(R.color.colorCross);
+                updateStatus(status, color);
+                cellLinkedList.add(cells[row][col]);
                 Log.v("Step", "\n" + zero + "\trow: " + row + "\tcol: " + col);
             }
             move++;
@@ -81,12 +97,19 @@ public class MainActivity extends Activity {
         //Проверка на победу после хода
         if (checkWin()) {
             String status = getString(R.string.textStatus_win) + " " + winner;
-            textStatus.setText(status);
+            int color;
+            if (winner.equals(cross))
+                color = getResources().getColor(R.color.colorCross);
+            else
+                color = getResources().getColor(R.color.colorZero);
+            updateStatus(status, color);
             return;
         }
         //Если кончились ходы
         if (move == 10) {
-            textStatus.setText(getString(R.string.textStatus_draw));
+            int color = getResources().getColor(R.color.colorStatusDraw);
+            String status = getResources().getString(R.string.textStatus_draw);
+            updateStatus(status, color);
             return;
         }
         //Если включена игра с ботом
@@ -104,11 +127,33 @@ public class MainActivity extends Activity {
                 cell.clear();
         move = 1;
         String status = getString(R.string.textStatus_step) + " " + cross;
-        textStatus.setText(status);
+        int color = getResources().getColor(R.color.colorCross);
+        updateStatus(status, color);
         winner = "";
+        cellLinkedList = new LinkedList<>();
     }
 
-    protected boolean checkWin() {
+    public void stepBack(View view) {
+        if (cellLinkedList.size() != 0) {
+            Cell cell = cellLinkedList.getLast();
+            cellLinkedList.remove(cell);
+            cell.clear();
+            if (move % 2 == 0) {
+                String status = getString(R.string.textStatus_step) + " " + cross;
+                int color = getResources().getColor(R.color.colorCross);
+                updateStatus(status, color);
+            }
+            else {
+                String status = getString(R.string.textStatus_step) + " " + zero;
+                int color = getResources().getColor(R.color.colorZero);
+                updateStatus(status, color);
+            }
+            move--;
+            winner = "";
+        }
+    }
+
+    public boolean checkWin() {
         winner = "";
         try {
             //rows
@@ -128,7 +173,7 @@ public class MainActivity extends Activity {
     }
 
     //Проверка линии на нахождение победной комбинации
-    protected void checkLineOnWin(int xStart, int yStart, int xStep, int yStep) throws GotWinnerException {
+    public void checkLineOnWin(int xStart, int yStart, int xStep, int yStep) throws GotWinnerException {
         int count = 1;
         Cell saved = cells[yStart][xStart];
         int i = yStart + yStep;
@@ -164,12 +209,12 @@ public class MainActivity extends Activity {
         }
     }
 
-    /*TODO переделать бота
+    /*
     * Функция возвращает ячейку, на которую стоит сходить
     * me - сторона за которую надо делать ход (cross|zero)
     * enemy - враг, которого надо попытаться заблокировать (cross|zero)
     */
-    protected Cell scanBotOnStep(String me, String enemy) {
+    public Cell scanBotOnStep(String me, String enemy) {
         //Если свободен центр на втором ходе
         if (move == 2) {
             if (cells[1][1].isEmpty())
@@ -202,6 +247,16 @@ public class MainActivity extends Activity {
             return cell;
         }
         //Попытка заблокировать победу врага
+        //scan left diagonal
+        cell = scanLineOnStep(0, 0, 1, 1, 2, enemy, false);
+        if (cell != null) {
+            return cell;
+        }
+        //scan right diagonal
+        cell = scanLineOnStep(2, 0, -1, 1, 2, enemy, false);
+        if (cell != null) {
+            return cell;
+        }
         //scan rows
         for (int i = 0; i < 3; i++) {
             cell = scanLineOnStep(0, i, 1, 0, 2, enemy, false);
@@ -216,24 +271,17 @@ public class MainActivity extends Activity {
                 return cell;
             }
         }
-        //scan left diagonal
-        cell = scanLineOnStep(0, 0, 1, 1, 2, enemy, false);
-        if (cell != null) {
-            return cell;
-        }
-        //scan right diagonal
-        cell = scanLineOnStep(2, 0, -1, 1, 2, enemy, false);
-        if (cell != null) {
-            return cell;
-        }
         //Простой ход, если не удалось выиграть или заблокировать
-        for (int j = 0; j < 3; j--) {
-            //scan rows
-            for (int i = 0; i < 3; i++) {
-                cell = scanLineOnStep(0, i, 1, 0, j, me, true);
-                if (cell != null) {
-                    return cell;
-                }
+        for (int j = 3; j >= 2; j--) {
+            //scan left diagonal
+            cell = scanLineOnStep(0, 0, 1, 1, j, me, true);
+            if (cell != null) {
+                return cell;
+            }
+            //scan right diagonal
+            cell = scanLineOnStep(2, 0, -1, 1, j, me, true);
+            if (cell != null) {
+                return cell;
             }
             //scan columns
             for (int i = 0; i < 3; i++) {
@@ -242,15 +290,12 @@ public class MainActivity extends Activity {
                     return cell;
                 }
             }
-            //scan left diagonal
-            cell = scanLineOnStep(2, 2, -1, -1, j, me, true);
-            if (cell != null) {
-                return cell;
-            }
-            //scan right diagonal
-            cell = scanLineOnStep(0, 2, 1, -1, j, me, true);
-            if (cell != null) {
-                return cell;
+            //scan rows
+            for (int i = 0; i < 3; i++) {
+                cell = scanLineOnStep(0, i, 1, 0, j, me, true);
+                if (cell != null) {
+                    return cell;
+                }
             }
         }
         return null;
@@ -265,7 +310,7 @@ public class MainActivity extends Activity {
     * player - тип подсчитываемых последовательных ячеек(cross|zero)
     * countEmpty - логическая переменная, отвечает за подсчет пустых ячеек(считать их или нет), нужна для выгодного хода, когдв не удалось заблокировать или выиграть
     */
-    protected Cell scanLineOnStep(int xStart, int yStart, int xStep, int yStep, int count, String player, boolean countEmpty) {
+    public Cell scanLineOnStep(int xStart, int yStart, int xStep, int yStep, int count, String player, boolean countEmpty) {
         int k = 0;
         Cell result = null;
         int i = yStart;

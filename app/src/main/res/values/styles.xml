@@ -7,4 +7,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="switchBotStyle" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">@color/colorCross</item>
+        <item name="android:colorForeground">@color/colorStatusDraw</item>
+    </style>
+
 </resources>
