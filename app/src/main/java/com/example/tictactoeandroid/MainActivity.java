@@ -15,6 +15,7 @@ import com.example.tictactoeandroid.component.Cell;
 import com.example.tictactoeandroid.component.GotWinnerException;
 
 import java.util.LinkedList;
+import java.util.Random;
 
 public class MainActivity extends Activity {
 
@@ -24,6 +25,7 @@ public class MainActivity extends Activity {
     public static String cross = "X";
     public static String zero = "0";
 
+    //TODO изменение цвета текста
     private TextView textStatus;
     private Switch switchMode;
 
@@ -66,11 +68,13 @@ public class MainActivity extends Activity {
                 cells[row][col].setText(cross);
                 String status = getString(R.string.textStatus_step) + " " + zero;
                 textStatus.setText(status);
+                Log.v("Step", "\n" + cross + "\trow: " + row + "\tcol: " + col);
             }
             else {
                 cells[row][col].setText(zero);
                 String status = getString(R.string.textStatus_step) + " " + cross;
                 textStatus.setText(status);
+                Log.v("Step", "\n" + zero + "\trow: " + row + "\tcol: " + col);
             }
             move++;
         }
@@ -86,7 +90,10 @@ public class MainActivity extends Activity {
             return;
         }
         //Если включена игра с ботом
-        if (switchMode.isChecked() && move % 2 == 0) {
+        if (switchMode.isChecked()
+                && move % 2 == 0
+        )
+        {
             botAction();
         }
     }
@@ -157,7 +164,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    /*
+    /*TODO переделать бота
     * Функция возвращает ячейку, на которую стоит сходить
     * me - сторона за которую надо делать ход (cross|zero)
     * enemy - враг, которого надо попытаться заблокировать (cross|zero)
@@ -165,22 +172,11 @@ public class MainActivity extends Activity {
     protected Cell scanBotOnStep(String me, String enemy) {
         //Если свободен центр на втором ходе
         if (move == 2) {
-            if (cells[1][1].isEmpty()) {
+            if (cells[1][1].isEmpty())
                 return cells[1][1];
-            }
         }
         Cell cell = null;
         //Попытка выиграть игру
-        //scan left diagonal
-        cell = scanLineOnStep(0, 0, 1, 1, 2, me, false);
-        if (cell != null) {
-            return cell;
-        }
-        //scan right diagonal
-        cell = scanLineOnStep(2, 0, -1, 1, 2, me, false);
-        if (cell != null) {
-            return cell;
-        }
         //scan rows
         for (int i = 0; i < 3; i++) {
             cell = scanLineOnStep(0, i, 1, 0, 2, me, false);
@@ -195,17 +191,17 @@ public class MainActivity extends Activity {
                 return cell;
             }
         }
-        //Попытка заблокировать победу врага
         //scan left diagonal
-        cell = scanLineOnStep(0, 0, 1, 1, 2, enemy, false);
+        cell = scanLineOnStep(0, 0, 1, 1, 2, me, false);
         if (cell != null) {
             return cell;
         }
         //scan right diagonal
-        cell = scanLineOnStep(2, 0, -1, 1, 2, enemy, false);
+        cell = scanLineOnStep(2, 0, -1, 1, 2, me, false);
         if (cell != null) {
             return cell;
         }
+        //Попытка заблокировать победу врага
         //scan rows
         for (int i = 0; i < 3; i++) {
             cell = scanLineOnStep(0, i, 1, 0, 2, enemy, false);
@@ -220,18 +216,18 @@ public class MainActivity extends Activity {
                 return cell;
             }
         }
+        //scan left diagonal
+        cell = scanLineOnStep(0, 0, 1, 1, 2, enemy, false);
+        if (cell != null) {
+            return cell;
+        }
+        //scan right diagonal
+        cell = scanLineOnStep(2, 0, -1, 1, 2, enemy, false);
+        if (cell != null) {
+            return cell;
+        }
         //Простой ход, если не удалось выиграть или заблокировать
-        for (int j = 3; j >= 0; j--) {
-            //scan left diagonal
-            cell = scanLineOnStep(0, 0, 1, 1, j, me, true);
-            if (cell != null) {
-                return cell;
-            }
-            //scan right diagonal
-            cell = scanLineOnStep(2, 0, -1, 1, j, me, true);
-            if (cell != null) {
-                return cell;
-            }
+        for (int j = 0; j < 3; j--) {
             //scan rows
             for (int i = 0; i < 3; i++) {
                 cell = scanLineOnStep(0, i, 1, 0, j, me, true);
@@ -245,6 +241,16 @@ public class MainActivity extends Activity {
                 if (cell != null) {
                     return cell;
                 }
+            }
+            //scan left diagonal
+            cell = scanLineOnStep(2, 2, -1, -1, j, me, true);
+            if (cell != null) {
+                return cell;
+            }
+            //scan right diagonal
+            cell = scanLineOnStep(0, 2, 1, -1, j, me, true);
+            if (cell != null) {
+                return cell;
             }
         }
         return null;

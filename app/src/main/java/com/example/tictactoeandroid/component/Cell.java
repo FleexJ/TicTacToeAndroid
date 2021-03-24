@@ -1,6 +1,7 @@
 package com.example.tictactoeandroid.component;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.view.View;
@@ -16,10 +17,12 @@ public class Cell {
     private int row;
     private int col;
 
+    //TODO изменение цвета букв
     public Cell(Button button, final int row, final int col, final MainActivity activity) {
         this.button = button;
         this.row = row;
         this.col = col;
+        ColorStateList colorStateList = button.getTextColors();
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
