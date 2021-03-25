@@ -216,13 +216,14 @@ public class MainActivity extends Activity {
     */
     public Cell scanBotOnStep(String me, String enemy) {
         //Если свободен центр на втором ходе
-        if (move == 2) {
-            if (cells[1][1].isEmpty())
-                return cells[1][1];
-        }
-        if (move == 4) {
-            if (cells[1][2].isEmpty() && cells[2][0].equals(cross) && cells[0][2].equals(cross)) {
-                return cells[1][2];
+        if (move == 2 ) {
+            Random random = new Random();
+            while(true) {
+                int i = random.nextInt(3);
+                int j = random.nextInt(3);
+                Cell cell = cells[i][j];
+                if (cell.isEmpty())
+                    return cell;
             }
         }
         Cell cell = null;
@@ -279,6 +280,13 @@ public class MainActivity extends Activity {
         }
         //Простой ход, если не удалось выиграть или заблокировать
         for (int j = 3; j >= 2; j--) {
+            //scan columns
+            for (int i = 0; i < 3; i++) {
+                cell = scanLineOnStep(i, 0, 0, 1, j, me, true);
+                if (cell != null) {
+                    return cell;
+                }
+            }
             //scan left diagonal
             cell = scanLineOnStep(2, 2, -1, -1, j, me, true);
             if (cell != null) {
@@ -292,16 +300,9 @@ public class MainActivity extends Activity {
                 }
             }
             //scan right diagonal
-            cell = scanLineOnStep(0, 2, 1, -1, j, me, true);
+            cell = scanLineOnStep(2, 0, -1, 1, j, me, true);
             if (cell != null) {
                 return cell;
-            }
-            //scan columns
-            for (int i = 0; i < 3; i++) {
-                cell = scanLineOnStep(i, 0, 0, 1, j, me, true);
-                if (cell != null) {
-                    return cell;
-                }
             }
         }
         return null;
