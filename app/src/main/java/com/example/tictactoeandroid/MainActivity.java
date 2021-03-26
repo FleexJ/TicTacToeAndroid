@@ -117,7 +117,7 @@ public class MainActivity extends Activity {
                 && move % 2 == 0
         )
         {
-            botAction();
+            botAction(row, col);
         }
     }
 
@@ -178,7 +178,7 @@ public class MainActivity extends Activity {
         Cell saved = cells[yStart][xStart];
         int i = yStart + yStep;
         int j = xStart + xStep;
-        for (int k = 1; k < 3; k++) {
+        while (i < 3 && j < 3 && i >= 0 && j >= 0) {
             Cell cell = cells[i][j];
             //Если встретилась последовательность одинаковых непустых ячеек
             if (saved.equals(cell) && !saved.isEmpty())
@@ -197,14 +197,14 @@ public class MainActivity extends Activity {
     }
 
     //Ход бота
-    public void botAction() {
+    public void botAction(int row, int col) {
         //Проверяем чей ход, чтобы определить свою сторону
         if (move % 2 == 0) {
-            Cell cell = scanBotOnStep(zero, cross);
+            Cell cell = scanBotOnStep(zero, cross, row, col);
             action(cell.getRow(), cell.getCol());
         }
         else {
-            Cell cell = scanBotOnStep(cross, zero);
+            Cell cell = scanBotOnStep(cross, zero, row, col);
             action(cell.getRow(), cell.getCol());
         }
     }
@@ -214,7 +214,7 @@ public class MainActivity extends Activity {
     * me - сторона за которую надо делать ход (cross|zero)
     * enemy - враг, которого надо попытаться заблокировать (cross|zero)
     */
-    public Cell scanBotOnStep(String me, String enemy) {
+    public Cell scanBotOnStep(String me, String enemy, int row, int col) {
         //Если свободен центр на втором ходе
         if (move == 2 ) {
             Random random = new Random();
@@ -264,19 +264,15 @@ public class MainActivity extends Activity {
         if (cell != null) {
             return cell;
         }
-        //scan rows
-        for (int i = 0; i < 3; i++) {
-            cell = scanLineOnStep(0, i, 1, 0, 2, enemy, false);
-            if (cell != null) {
-                return cell;
-            }
+        //scan row
+        cell = scanLineOnStep(0, row, 1, 0, 2, enemy, false);
+        if (cell != null) {
+            return cell;
         }
-        //scan columns
-        for (int i = 0; i < 3; i++) {
-            cell = scanLineOnStep(i, 0, 0, 1, 2, enemy, false);
-            if (cell != null) {
-                return cell;
-            }
+        //scan column
+        cell = scanLineOnStep(col, 0, 0, 1, 2, enemy, false);
+        if (cell != null) {
+            return cell;
         }
         //Простой ход, если не удалось выиграть или заблокировать
         for (int j = 3; j >= 2; j--) {
@@ -288,7 +284,7 @@ public class MainActivity extends Activity {
                 }
             }
             //scan left diagonal
-            cell = scanLineOnStep(2, 2, -1, -1, j, me, true);
+            cell = scanLineOnStep(0, 0, 1, 1, j, me, true);
             if (cell != null) {
                 return cell;
             }
@@ -323,7 +319,7 @@ public class MainActivity extends Activity {
         int i = yStart;
         int j = xStart;
 
-        for (int c = 0; c < 3; c++) {
+        while (i < 3 && j < 3 && i >= 0 && j >= 0) {
             Cell cell = cells[i][j];
             //Если встретилась пустая ячейка, запоминаем ее
             if (cell.isEmpty()) {
