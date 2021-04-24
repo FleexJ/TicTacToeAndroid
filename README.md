@@ -5,4 +5,4 @@
 Есть кнопка отката предыдущего шага.  
 Есть кнопка рестарта.
 
-<img src="https://github.com/kreslojerry/resource/blob/main/TicTacToeAndroid/tictactoeandroid.png" width="400px"/>
+<img src="https://github.com/FleexJ/resource/blob/main/TicTacToeAndroid/tictactoeandroid.png" width="400px"/>
