@@ -85,7 +85,6 @@ public class MainActivity extends Activity {
                 cells[row][col].setText(zero);
                 int color = getResources().getColor(R.color.colorZero);
                 cells[row][col].setTextColor(color);
-                cells[row][col].setTextColor(Color.RED);
                 String status = getString(R.string.textStatus_step) + " " + cross;
                 color = getResources().getColor(R.color.colorCross);
                 updateStatus(status, color);
