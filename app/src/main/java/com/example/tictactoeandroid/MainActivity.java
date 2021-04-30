@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
     private Cell[][] cells = new Cell[3][3];
     public static String cross = "X";
     public static String zero = "0";
-    private LinkedList<Cell> cellLinkedList = new LinkedList<>();
+    private LinkedList<Cell> allStepsCells = new LinkedList<>();
 
     private TextView textStatus;
     private Switch switchMode;
@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
                 String status = getString(R.string.textStatus_step) + " " + zero;
                 color = getResources().getColor(R.color.colorZero);
                 updateStatus(status, color);
-                cellLinkedList.add(cells[row][col]);
+                allStepsCells.add(cells[row][col]);
                 Log.v("Step", "\n" + cross + "\trow: " + row + "\tcol: " + col);
             }
             else {
@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
                 String status = getString(R.string.textStatus_step) + " " + cross;
                 color = getResources().getColor(R.color.colorCross);
                 updateStatus(status, color);
-                cellLinkedList.add(cells[row][col]);
+                allStepsCells.add(cells[row][col]);
                 Log.v("Step", "\n" + zero + "\trow: " + row + "\tcol: " + col);
             }
             move++;
@@ -130,13 +130,13 @@ public class MainActivity extends Activity {
         int color = getResources().getColor(R.color.colorCross);
         updateStatus(status, color);
         winner = "";
-        cellLinkedList = new LinkedList<>();
+        allStepsCells = new LinkedList<>();
     }
 
     public void stepBack(View view) {
-        if (cellLinkedList.size() != 0) {
-            Cell cell = cellLinkedList.getLast();
-            cellLinkedList.remove(cell);
+        if (allStepsCells.size() != 0) {
+            Cell cell = allStepsCells.getLast();
+            allStepsCells.remove(cell);
             cell.clear();
             if (move % 2 == 0) {
                 String status = getString(R.string.textStatus_step) + " " + cross;
@@ -231,7 +231,6 @@ public class MainActivity extends Activity {
             }
         }
         try {
-            Cell cell = null;
             //Попытка выиграть игру
             //scan rows
             for (int i = 0; i < 3; i++) {
