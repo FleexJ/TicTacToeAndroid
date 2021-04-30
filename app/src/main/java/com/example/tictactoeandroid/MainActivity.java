@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.tictactoeandroid.component.Cell;
+import com.example.tictactoeandroid.component.GotCellToStepException;
 import com.example.tictactoeandroid.component.GotWinnerException;
 
 import java.util.LinkedList;
@@ -229,80 +230,49 @@ public class MainActivity extends Activity {
                 }
             }
         }
-        Cell cell = null;
-        //Попытка выиграть игру
-        //scan rows
-        for (int i = 0; i < 3; i++) {
-            cell = scanLineOnStep(0, i, 1, 0, 2, me, 1);
-            if (cell != null) {
-                return cell;
-            }
-        }
-        //scan columns
-        for (int i = 0; i < 3; i++) {
-            cell = scanLineOnStep(i, 0, 0, 1, 2, me, 1);
-            if (cell != null) {
-                return cell;
-            }
-        }
-        //scan left diagonal
-        cell = scanLineOnStep(0, 0, 1, 1, 2, me, 1);
-        if (cell != null) {
-            return cell;
-        }
-        //scan right diagonal
-        cell = scanLineOnStep(2, 0, -1, 1, 2, me, 1);
-        if (cell != null) {
-            return cell;
-        }
-
-        //Попытка заблокировать победу врага
-        //scan left diagonal
-        cell = scanLineOnStep(0, 0, 1, 1, 2, enemy, 1);
-        if (cell != null) {
-            return cell;
-        }
-        //scan right diagonal
-        cell = scanLineOnStep(2, 0, -1, 1, 2, enemy, 1);
-        if (cell != null) {
-            return cell;
-        }
-        //scan row
-        cell = scanLineOnStep(0, row, 1, 0, 2, enemy, 1);
-        if (cell != null) {
-            return cell;
-        }
-        //scan column
-        cell = scanLineOnStep(col, 0, 0, 1, 2, enemy, 1);
-        if (cell != null) {
-            return cell;
-        }
-        //Простой ход, если не удалось выиграть или заблокировать
-        for (int j = 2; j >= 1; j--) {
-            //scan left diagonal
-            cell = scanLineOnStep(0, 0, 1, 1, 1, me, j);
-            if (cell != null) {
-                return cell;
-            }
-            //scan right diagonal
-            cell = scanLineOnStep(2, 0, -1, 1, 1, me, j);
-            if (cell != null) {
-                return cell;
+        try {
+            Cell cell = null;
+            //Попытка выиграть игру
+            //scan rows
+            for (int i = 0; i < 3; i++) {
+                scanLineOnStep(0, i, 1, 0, 2, me, 1);
             }
             //scan columns
             for (int i = 0; i < 3; i++) {
-                cell = scanLineOnStep(i, 0, 0, 1, 1, me, j);
-                if (cell != null) {
-                    return cell;
+                scanLineOnStep(i, 0, 0, 1, 2, me, 1);
+            }
+            //scan left diagonal
+            scanLineOnStep(0, 0, 1, 1, 2, me, 1);
+            //scan right diagonal
+            scanLineOnStep(2, 0, -1, 1, 2, me, 1);
+
+            //Попытка заблокировать победу врага
+            //scan left diagonal
+            scanLineOnStep(0, 0, 1, 1, 2, enemy, 1);
+            //scan right diagonal
+            scanLineOnStep(2, 0, -1, 1, 2, enemy, 1);
+            //scan row
+            scanLineOnStep(0, row, 1, 0, 2, enemy, 1);
+            //scan column
+            scanLineOnStep(col, 0, 0, 1, 2, enemy, 1);
+
+            //Простой ход, если не удалось выиграть или заблокировать
+            for (int j = 2; j >= 1; j--) {
+                //scan left diagonal
+                scanLineOnStep(0, 0, 1, 1, 1, me, j);
+                //scan right diagonal
+                scanLineOnStep(2, 0, -1, 1, 1, me, j);
+                //scan columns
+                for (int i = 0; i < 3; i++) {
+                    scanLineOnStep(i, 0, 0, 1, 1, me, j);
+                }
+                //scan rows
+                for (int i = 0; i < 3; i++) {
+                    scanLineOnStep(0, i, 1, 0, 1, me, j);
                 }
             }
-            //scan rows
-            for (int i = 0; i < 3; i++) {
-                cell = scanLineOnStep(0, i, 1, 0, 1, me, j);
-                if (cell != null) {
-                    return cell;
-                }
-            }
+        } catch (GotCellToStepException e) {
+            return e.getCell();
         }
         return null;
     }
@@ -316,7 +286,13 @@ public class MainActivity extends Activity {
     * player - тип подсчитываемых последовательных ячеек(cross|zero)
     * countEmpty - количество пустых клеток
     */
-    public Cell scanLineOnStep(int xStart, int yStart, int xStep, int yStep, int count, String player, int countEmpty) {
+    public void scanLineOnStep(int xStart,
+                               int yStart,
+                               int xStep,
+                               int yStep,
+                               int count,
+                               String player,
+                               int countEmpty) throws GotCellToStepException{
         int k = 0;
         int kEmpty = 0;
         Cell result = null;
@@ -329,24 +305,19 @@ public class MainActivity extends Activity {
             if (cell.isEmpty()) {
                 result = cell;
                 kEmpty++;
-            }
-            else
-                //Если идет последовательность одинаковых непустых клеток, то считаем ее длину
-                if (cell.equals(player)) {
+            } //Если идет последовательность одинаковых непустых клеток, то считаем ее длину
+            else if (cell.equals(player)) {
                     k++;
-                }
-                //Если встретилась другая клетка, то обнуляем счет
-                else {
+                } else { //Если встретилась другая клетка, то обнуляем счет
                     k = 0;
                     kEmpty = 0;
                 }
             //Если найдена оптимальная ячейка для хода, то возвращаем ее
             if (k == count && result != null && kEmpty == countEmpty) {
-                return result;
+                throw new GotCellToStepException(result);
             }
             i += yStep;
             j += xStep;
         }
-        return null;
     }
 }
