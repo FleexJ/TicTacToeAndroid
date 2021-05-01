@@ -1,9 +1,6 @@
 package com.example.tictactoeandroid;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -76,9 +73,11 @@ public class MainActivity extends Activity {
                 cells[row][col].setText(cross);
                 int color = getResources().getColor(R.color.colorCross);
                 cells[row][col].setTextColor(color);
+
                 String status = getString(R.string.textStatus_step) + " " + zero;
                 color = getResources().getColor(R.color.colorZero);
                 updateStatus(status, color);
+
                 allStepsCells.add(cells[row][col]);
                 Log.v("Step", "\n" + cross + "\trow: " + row + "\tcol: " + col);
             }
@@ -86,9 +85,11 @@ public class MainActivity extends Activity {
                 cells[row][col].setText(zero);
                 int color = getResources().getColor(R.color.colorZero);
                 cells[row][col].setTextColor(color);
+
                 String status = getString(R.string.textStatus_step) + " " + cross;
                 color = getResources().getColor(R.color.colorCross);
                 updateStatus(status, color);
+
                 allStepsCells.add(cells[row][col]);
                 Log.v("Step", "\n" + zero + "\trow: " + row + "\tcol: " + col);
             }
@@ -113,18 +114,15 @@ public class MainActivity extends Activity {
             return;
         }
         //Если включена игра с ботом
-        if (switchMode.isChecked()
-                && move % 2 == 0
-        )
-        {
+        if (switchMode.isChecked() && move % 2 == 0)
             botAction(row, col);
-        }
     }
 
     public void restart(View view) {
         for (Cell[] arr: cells)
             for (Cell cell: arr)
                 cell.clear();
+
         move = 1;
         String status = getString(R.string.textStatus_step) + " " + cross;
         int color = getResources().getColor(R.color.colorCross);
@@ -138,6 +136,7 @@ public class MainActivity extends Activity {
             Cell cell = allStepsCells.getLast();
             allStepsCells.remove(cell);
             cell.clear();
+
             if (move % 2 == 0) {
                 String status = getString(R.string.textStatus_step) + " " + cross;
                 int color = getResources().getColor(R.color.colorCross);
@@ -173,11 +172,15 @@ public class MainActivity extends Activity {
     }
 
     //Проверка линии на нахождение победной комбинации
-    public void checkLineOnWin(int xStart, int yStart, int xStep, int yStep) throws GotWinnerException {
+    public void checkLineOnWin(int xStart,
+                               int yStart,
+                               int xStep,
+                               int yStep) throws GotWinnerException {
         int count = 1;
         Cell saved = cells[yStart][xStart];
         int i = yStart + yStep;
         int j = xStart + xStep;
+
         while (i < 3 && j < 3 && i >= 0 && j >= 0) {
             Cell cell = cells[i][j];
             //Если встретилась последовательность одинаковых непустых ячеек
@@ -191,6 +194,7 @@ public class MainActivity extends Activity {
             //Если победная комбинация, то вызываем exception с данными победителя
             if (count == 3)
                 throw new GotWinnerException(saved.getText());
+
             i += yStep;
             j += xStep;
         }
