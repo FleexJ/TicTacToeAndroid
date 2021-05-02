@@ -109,10 +109,6 @@ public class MainActivity extends Activity {
         textStatus.setText(text);
     }
 
-    public void clickBotAction(View view) {
-        botAction();
-    }
-
     public void restart(View view) {
         for (Cell[] arr: cells)
             for (Cell cell: arr)
@@ -147,8 +143,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void takeCell(int row, int col) {
-        Cell cell = cells[row][col];
+    public void takeCell(Cell cell) {
         if (cell.isEmpty()) {
             if (move % 2 != 0) {
                 cell.setText(cross);
@@ -161,7 +156,7 @@ public class MainActivity extends Activity {
                         getResources().getColor(R.color.colorZero)
                 );
 
-                Log.v("Step", cross + "\trow: " + row + "\tcol: " + col);
+                Log.v("Step", cross + "\trow: " + cell.getRow() + "\tcol: " + cell.getCol());
             }
             else {
                 cell.setText(zero);
@@ -174,7 +169,7 @@ public class MainActivity extends Activity {
                         getResources().getColor(R.color.colorCross)
                 );
 
-                Log.v("Step", zero + "\trow: " + row + "\tcol: " + col);
+                Log.v("Step", zero + "\trow: " + cell.getRow() + "\tcol: " + cell.getCol());
             }
             moveBuffer.add(cell);
             move++;
@@ -190,35 +185,34 @@ public class MainActivity extends Activity {
 
         //Ход игрока
         if (cells[row][col].isEmpty()) {
-            takeCell(row, col);
+            takeCell(cells[row][col]);
         } else
             return;
 
         //Если включена игра с ботом
         if (switchMode.isChecked())
-            botAction();
+            botAction(null);
     }
 
     //Ход бота
-    public void botAction() {
+    public void botAction(View view) {
         if (isEnd())
             return;
 
         Cell cell;
-        if (move == 1 || move == 2 && cells[1][1].isEmpty()) {
+        if (move == 1 || move == 2 && cells[1][1].isEmpty())
             cell = cells[1][1];
-        } else //Проверяем чей ход, чтобы определить свою сторону
-            if (move % 2 != 0) {
+        else //Проверяем чей ход, чтобы определить свою сторону
+            if (move % 2 != 0)
                 cell = scanBotOnStep(cross, zero,
                         moveBuffer.getLast().getRow(),
                         moveBuffer.getLast().getCol());
-            } else {
+            else
                 cell = scanBotOnStep(zero, cross,
                         moveBuffer.getLast().getRow(),
                         moveBuffer.getLast().getCol());
-            }
 
-            takeCell(cell.getRow(), cell.getCol());
+        takeCell(cell);
     }
 
     //Проверка линии на нахождение победной комбинации

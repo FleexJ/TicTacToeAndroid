@@ -205,7 +205,7 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginLeft="20dp"
                 android:background="@drawable/bot"
-                android:onClick="clickBotAction"
+                android:onClick="botAction"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/buttonRestart"
                 app:layout_constraintTop_toTopOf="parent"
