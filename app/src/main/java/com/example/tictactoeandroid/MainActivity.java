@@ -231,7 +231,7 @@ public class MainActivity extends Activity {
             //Если встретилась последовательность одинаковых непустых ячеек
             if (saved.equals(cell) && !saved.isEmpty())
                 count++;
-                //Если они отличаются
+            //Если они отличаются
             else {
                 saved = cell;
                 count = 1;
