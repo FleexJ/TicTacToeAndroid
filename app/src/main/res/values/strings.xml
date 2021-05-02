@@ -4,4 +4,9 @@
     <string name="textStatus_step">Сейчас ходит: </string>
     <string name="textStatus_draw">Ничья</string>
     <string name="textStatus_win">Победили: </string>
+
+    <string name="restartButtonToast">Перезапуск игры</string>
+    <string name="stepBackButtonToast">Отмена предыдущего хода</string>
+    <string name="switchBotOnOffToast">Включение/отключение бота</string>
+    <string name="stepBotButtonToast">Следующий ход делает бот</string>
 </resources>

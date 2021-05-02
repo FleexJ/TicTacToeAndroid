@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,10 +24,13 @@ public class MainActivity extends Activity {
     private Cell[][] cells = new Cell[3][3];
     public static String cross = "X";
     public static String zero = "0";
-    private LinkedList<Cell> allStepsCells = new LinkedList<>();
+    private LinkedList<Cell> moveBuffer = new LinkedList<>();
 
     private TextView textStatus;
     private Switch switchMode;
+    private ImageButton buttonPrev;
+    private Button buttonRestart;
+    private Button buttonStepBot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,27 +39,69 @@ public class MainActivity extends Activity {
 
         switchMode = findViewById(R.id.switchMode);
         switchMode.setChecked(true);
+        switchMode.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                showToastShort(
+                        getString(R.string.switchBotOnOffToast)
+                );
+                return true;
+            }
+        });
+
+        buttonPrev = findViewById(R.id.buttonPrev);
+        buttonPrev.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                showToastShort(
+                        getString(R.string.stepBackButtonToast)
+                );
+                return true;
+            }
+        });
+
+        buttonRestart = findViewById(R.id.buttonRestart);
+        buttonRestart.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                showToastShort(
+                        getString(R.string.restartButtonToast)
+                );
+                return true;
+            }
+        });
+
+        buttonStepBot = findViewById(R.id.buttonStepBot);
+        buttonStepBot.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                showToastShort(
+                        getString(R.string.stepBotButtonToast)
+                );
+                return true;
+            }
+        });
 
         textStatus = findViewById(R.id.textStatus);
         int color = getResources().getColor(R.color.colorCross);
         String status = getString(R.string.textStatus_step) + " " + cross;
         updateStatus(status, color);
 
-        cells[0][0] = new Cell( (Button)findViewById(R.id.buttonCell0_0), 0, 0, this);
-        cells[0][1] = new Cell( (Button)findViewById(R.id.buttonCell0_1), 0, 1, this);
-        cells[0][2] = new Cell( (Button)findViewById(R.id.buttonCell0_2), 0, 2, this);
+        cells[0][0] = new Cell((Button) findViewById(R.id.buttonCell0_0), 0, 0, this);
+        cells[0][1] = new Cell((Button) findViewById(R.id.buttonCell0_1), 0, 1, this);
+        cells[0][2] = new Cell((Button) findViewById(R.id.buttonCell0_2), 0, 2, this);
 
-        cells[1][0] = new Cell( (Button)findViewById(R.id.buttonCell1_0), 1, 0, this);
-        cells[1][1] = new Cell( (Button)findViewById(R.id.buttonCell1_1), 1, 1, this);
-        cells[1][2] = new Cell( (Button)findViewById(R.id.buttonCell1_2), 1, 2, this);
+        cells[1][0] = new Cell((Button) findViewById(R.id.buttonCell1_0), 1, 0, this);
+        cells[1][1] = new Cell((Button) findViewById(R.id.buttonCell1_1), 1, 1, this);
+        cells[1][2] = new Cell((Button) findViewById(R.id.buttonCell1_2), 1, 2, this);
 
-        cells[2][0] = new Cell( (Button)findViewById(R.id.buttonCell2_0), 2, 0, this);
-        cells[2][1] = new Cell( (Button)findViewById(R.id.buttonCell2_1), 2, 1, this);
-        cells[2][2] = new Cell( (Button)findViewById(R.id.buttonCell2_2), 2, 2, this);
+        cells[2][0] = new Cell((Button) findViewById(R.id.buttonCell2_0), 2, 0, this);
+        cells[2][1] = new Cell((Button) findViewById(R.id.buttonCell2_1), 2, 1, this);
+        cells[2][2] = new Cell((Button) findViewById(R.id.buttonCell2_2), 2, 2, this);
     }
 
-    public void showToast(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    public void showToastShort(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     public void updateStatus(String text, int color) {
@@ -63,59 +109,8 @@ public class MainActivity extends Activity {
         textStatus.setText(text);
     }
 
-    public void action(int row, int col) {
-        //Если игра окончена
-        if (!winner.isEmpty())
-            return;
-        //Ход игрока или бота
-        if (cells[row][col].isEmpty()) {
-            if (move % 2 != 0) {
-                cells[row][col].setText(cross);
-                int color = getResources().getColor(R.color.colorCross);
-                cells[row][col].setTextColor(color);
-
-                String status = getString(R.string.textStatus_step) + " " + zero;
-                color = getResources().getColor(R.color.colorZero);
-                updateStatus(status, color);
-
-                allStepsCells.add(cells[row][col]);
-                Log.v("Step", "\n" + cross + "\trow: " + row + "\tcol: " + col);
-            }
-            else {
-                cells[row][col].setText(zero);
-                int color = getResources().getColor(R.color.colorZero);
-                cells[row][col].setTextColor(color);
-
-                String status = getString(R.string.textStatus_step) + " " + cross;
-                color = getResources().getColor(R.color.colorCross);
-                updateStatus(status, color);
-
-                allStepsCells.add(cells[row][col]);
-                Log.v("Step", "\n" + zero + "\trow: " + row + "\tcol: " + col);
-            }
-            move++;
-        }
-        //Проверка на победу после хода
-        if (checkWin()) {
-            String status = getString(R.string.textStatus_win) + " " + winner;
-            int color;
-            if (winner.equals(cross))
-                color = getResources().getColor(R.color.colorCross);
-            else
-                color = getResources().getColor(R.color.colorZero);
-            updateStatus(status, color);
-            return;
-        }
-        //Если кончились ходы
-        if (move == 10) {
-            int color = getResources().getColor(R.color.colorStatusDraw);
-            String status = getResources().getString(R.string.textStatus_draw);
-            updateStatus(status, color);
-            return;
-        }
-        //Если включена игра с ботом
-        if (switchMode.isChecked() && move % 2 == 0)
-            botAction(row, col);
+    public void clickBotAction(View view) {
+        botAction();
     }
 
     public void restart(View view) {
@@ -124,51 +119,106 @@ public class MainActivity extends Activity {
                 cell.clear();
 
         move = 1;
-        String status = getString(R.string.textStatus_step) + " " + cross;
-        int color = getResources().getColor(R.color.colorCross);
-        updateStatus(status, color);
+        updateStatus(
+                getString(R.string.textStatus_step) + " " + cross,
+                getResources().getColor(R.color.colorCross)
+        );
         winner = "";
-        allStepsCells = new LinkedList<>();
+        moveBuffer.clear();
     }
 
     public void stepBack(View view) {
-        if (allStepsCells.size() != 0) {
-            Cell cell = allStepsCells.getLast();
-            allStepsCells.remove(cell);
-            cell.clear();
+        if (moveBuffer.size() != 0) {
+            moveBuffer.getLast().clear();
+            moveBuffer.removeLast();
 
-            if (move % 2 == 0) {
-                String status = getString(R.string.textStatus_step) + " " + cross;
-                int color = getResources().getColor(R.color.colorCross);
-                updateStatus(status, color);
-            }
-            else {
-                String status = getString(R.string.textStatus_step) + " " + zero;
-                int color = getResources().getColor(R.color.colorZero);
-                updateStatus(status, color);
-            }
+            if (move % 2 == 0)
+                updateStatus(
+                        getString(R.string.textStatus_step) + " " + cross,
+                        getResources().getColor(R.color.colorCross)
+                );
+            else
+                updateStatus(
+                        getString(R.string.textStatus_step) + " " + zero,
+                        getResources().getColor(R.color.colorZero)
+                );
             move--;
             winner = "";
         }
     }
 
-    public boolean checkWin() {
-        winner = "";
-        try {
-            //rows
-            for (int i = 0; i < 3; i ++)
-                checkLineOnWin(0, i, 1, 0);
-            //cols
-            for (int i = 0; i < 3; i++)
-                checkLineOnWin(i, 0, 0, 1);
-            //left diagonal
-            checkLineOnWin(0, 0, 1, 1);
-            //right diagonal
-            checkLineOnWin(2, 0, -1, 1);
-        } catch (GotWinnerException e) {
-            winner = e.getWinner();
+    public void takeCell(int row, int col) {
+        Cell cell = cells[row][col];
+        if (cell.isEmpty()) {
+            if (move % 2 != 0) {
+                cell.setText(cross);
+                cell.setTextColor(
+                        getResources().getColor(R.color.colorCross)
+                );
+
+                updateStatus(
+                        getString(R.string.textStatus_step) + " " + zero,
+                        getResources().getColor(R.color.colorZero)
+                );
+
+                Log.v("Step", cross + "\trow: " + row + "\tcol: " + col);
+            }
+            else {
+                cell.setText(zero);
+                cell.setTextColor(
+                        getResources().getColor(R.color.colorZero)
+                );
+
+                updateStatus(
+                        getString(R.string.textStatus_step) + " " + cross,
+                        getResources().getColor(R.color.colorCross)
+                );
+
+                Log.v("Step", zero + "\trow: " + row + "\tcol: " + col);
+            }
+            moveBuffer.add(cell);
+            move++;
+
+            isEnd();
         }
-        return !winner.isEmpty();
+    }
+
+    public void action(int row, int col) {
+        //Если игра окончена
+        if (isEnd())
+            return;
+
+        //Ход игрока
+        if (cells[row][col].isEmpty()) {
+            takeCell(row, col);
+        } else
+            return;
+
+        //Если включена игра с ботом
+        if (switchMode.isChecked())
+            botAction();
+    }
+
+    //Ход бота
+    public void botAction() {
+        if (isEnd())
+            return;
+
+        Cell cell;
+        if (move == 1 || move == 2 && cells[1][1].isEmpty()) {
+            cell = cells[1][1];
+        } else //Проверяем чей ход, чтобы определить свою сторону
+            if (move % 2 != 0) {
+                cell = scanBotOnStep(cross, zero,
+                        moveBuffer.getLast().getRow(),
+                        moveBuffer.getLast().getCol());
+            } else {
+                cell = scanBotOnStep(zero, cross,
+                        moveBuffer.getLast().getRow(),
+                        moveBuffer.getLast().getCol());
+            }
+
+            takeCell(cell.getRow(), cell.getCol());
     }
 
     //Проверка линии на нахождение победной комбинации
@@ -186,7 +236,7 @@ public class MainActivity extends Activity {
             //Если встретилась последовательность одинаковых непустых ячеек
             if (saved.equals(cell) && !saved.isEmpty())
                 count++;
-            //Если они отличаются
+                //Если они отличаются
             else {
                 saved = cell;
                 count = 1;
@@ -200,16 +250,86 @@ public class MainActivity extends Activity {
         }
     }
 
-    //Ход бота
-    public void botAction(int row, int col) {
-        //Проверяем чей ход, чтобы определить свою сторону
-        if (move % 2 == 0) {
-            Cell cell = scanBotOnStep(zero, cross, row, col);
-            action(cell.getRow(), cell.getCol());
+    public boolean isEnd() {
+        if (!winner.isEmpty())
+            return true;
+
+        if (move >= 10) {
+            int color = getResources().getColor(R.color.colorStatusDraw);
+            String status = getResources().getString(R.string.textStatus_draw);
+            updateStatus(status, color);
+            return true;
         }
-        else {
-            Cell cell = scanBotOnStep(cross, zero, row, col);
-            action(cell.getRow(), cell.getCol());
+
+        winner = "";
+        try {
+            //rows
+            for (int i = 0; i < 3; i ++)
+                checkLineOnWin(0, i, 1, 0);
+            //cols
+            for (int i = 0; i < 3; i++)
+                checkLineOnWin(i, 0, 0, 1);
+            //left diagonal
+            checkLineOnWin(0, 0, 1, 1);
+            //right diagonal
+            checkLineOnWin(2, 0, -1, 1);
+        } catch (GotWinnerException e) {
+            winner = e.getWinner();
+            String status = getString(R.string.textStatus_win) + " " + winner;
+            if (winner.equals(cross)) {
+                int color = getResources().getColor(R.color.colorCross);
+                updateStatus(status, color);
+            }
+            else if (winner.equals(zero)) {
+                int color = getResources().getColor(R.color.colorZero);
+                updateStatus(status, color);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /*
+     * Функция проверяет линию на возможность хода
+     * xStart - координата начала линии по X
+     * yStart - координата начала линии по Y
+     * xStep - шаг по оси X
+     * yStep - шаг по оси Y
+     * player - тип подсчитываемых последовательных ячеек(cross|zero)
+     * countEmpty - количество пустых клеток
+     */
+    public void scanLineOnStep(int xStart,
+                               int yStart,
+                               int xStep,
+                               int yStep,
+                               int count,
+                               String player,
+                               int countEmpty) throws GotCellToStepException{
+        int k = 0;
+        int kEmpty = 0;
+        Cell result = null;
+        int i = yStart;
+        int j = xStart;
+
+        while (i < 3 && j < 3 && i >= 0 && j >= 0) {
+            Cell cell = cells[i][j];
+            //Если встретилась пустая ячейка, запоминаем ее
+            if (cell.isEmpty()) {
+                result = cell;
+                kEmpty++;
+            } //Если идет последовательность одинаковых непустых клеток, то считаем ее длину
+            else if (cell.equals(player)) {
+                k++;
+            } else { //Если встретилась другая клетка, то обнуляем счет
+                k = 0;
+                kEmpty = 0;
+            }
+            //Если найдена оптимальная ячейка для хода, то возвращаем ее
+            if (k == count && result != null && kEmpty == countEmpty) {
+                throw new GotCellToStepException(result);
+            }
+            i += yStep;
+            j += xStep;
         }
     }
 
@@ -220,7 +340,7 @@ public class MainActivity extends Activity {
     */
     public Cell scanBotOnStep(String me, String enemy, int row, int col) {
         //Если свободен центр на втором ходе
-        if (move == 2 ) {
+        if (move < 3 ) {
             if (cells[1][1].isEmpty())
                 return cells[1][1];
             else {
@@ -278,49 +398,5 @@ public class MainActivity extends Activity {
             return e.getCell();
         }
         return null;
-    }
-
-    /*
-    * Функция проверяет линию на возможность хода
-    * xStart - координата начала линии по X
-    * yStart - координата начала линии по Y
-    * xStep - шаг по оси X
-    * yStep - шаг по оси Y
-    * player - тип подсчитываемых последовательных ячеек(cross|zero)
-    * countEmpty - количество пустых клеток
-    */
-    public void scanLineOnStep(int xStart,
-                               int yStart,
-                               int xStep,
-                               int yStep,
-                               int count,
-                               String player,
-                               int countEmpty) throws GotCellToStepException{
-        int k = 0;
-        int kEmpty = 0;
-        Cell result = null;
-        int i = yStart;
-        int j = xStart;
-
-        while (i < 3 && j < 3 && i >= 0 && j >= 0) {
-            Cell cell = cells[i][j];
-            //Если встретилась пустая ячейка, запоминаем ее
-            if (cell.isEmpty()) {
-                result = cell;
-                kEmpty++;
-            } //Если идет последовательность одинаковых непустых клеток, то считаем ее длину
-            else if (cell.equals(player)) {
-                    k++;
-                } else { //Если встретилась другая клетка, то обнуляем счет
-                    k = 0;
-                    kEmpty = 0;
-                }
-            //Если найдена оптимальная ячейка для хода, то возвращаем ее
-            if (k == count && result != null && kEmpty == countEmpty) {
-                throw new GotCellToStepException(result);
-            }
-            i += yStep;
-            j += xStep;
-        }
     }
 }

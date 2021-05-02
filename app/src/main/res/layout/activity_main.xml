@@ -157,15 +157,15 @@
                 android:id="@+id/switchMode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="40dp"
-                android:layout_marginLeft="40dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginLeft="30dp"
                 android:scaleX="1.2"
                 android:scaleY="1.2"
                 android:text="@string/text_modeSwitch"
                 android:textColor="@color/colorStatusDraw"
                 android:theme="@style/switchBotStyle"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/buttonRestart"
+                app:layout_constraintStart_toEndOf="@+id/buttonStepBot"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.538" />
 
@@ -173,21 +173,21 @@
                 android:id="@+id/buttonRestart"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginStart="30dp"
-                android:layout_marginLeft="30dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginLeft="20dp"
                 android:background="@drawable/refresh"
                 android:onClick="restart"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/buttonPrev"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="1.0" />
+                app:layout_constraintVertical_bias="0.0" />
 
             <ImageButton
                 android:id="@+id/buttonPrev"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginStart="50dp"
-                android:layout_marginLeft="50dp"
+                android:layout_marginStart="45dp"
+                android:layout_marginLeft="45dp"
                 android:background="#00FFFFFF"
                 android:foregroundGravity="center_vertical|center_horizontal"
                 android:onClick="stepBack"
@@ -197,6 +197,19 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="1.0" />
+
+            <Button
+                android:id="@+id/buttonStepBot"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginLeft="20dp"
+                android:background="@drawable/bot"
+                android:onClick="clickBotAction"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/buttonRestart"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
