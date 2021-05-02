@@ -144,7 +144,7 @@ public class MainActivity extends Activity {
     }
 
     public void takeCell(Cell cell) {
-        if (!cell.isEmpty())
+        if (cell == null || !cell.isEmpty())
             return;
 
         if (move % 2 != 0) {
