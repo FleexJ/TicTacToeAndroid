@@ -144,38 +144,39 @@ public class MainActivity extends Activity {
     }
 
     public void takeCell(Cell cell) {
-        if (cell.isEmpty()) {
-            if (move % 2 != 0) {
-                cell.setText(cross);
-                cell.setTextColor(
-                        getResources().getColor(R.color.colorCross)
-                );
+        if (!cell.isEmpty())
+            return;
 
-                updateStatus(
-                        getString(R.string.textStatus_step) + " " + zero,
-                        getResources().getColor(R.color.colorZero)
-                );
+        if (move % 2 != 0) {
+            cell.setText(cross);
+            cell.setTextColor(
+                    getResources().getColor(R.color.colorCross)
+            );
 
-                Log.v("Step", cross + "\trow: " + cell.getRow() + "\tcol: " + cell.getCol());
-            }
-            else {
-                cell.setText(zero);
-                cell.setTextColor(
-                        getResources().getColor(R.color.colorZero)
-                );
+            updateStatus(
+                    getString(R.string.textStatus_step) + " " + zero,
+                    getResources().getColor(R.color.colorZero)
+            );
 
-                updateStatus(
-                        getString(R.string.textStatus_step) + " " + cross,
-                        getResources().getColor(R.color.colorCross)
-                );
-
-                Log.v("Step", zero + "\trow: " + cell.getRow() + "\tcol: " + cell.getCol());
-            }
-            moveBuffer.add(cell);
-            move++;
-
-            isEnd();
+            Log.v("Step", cross + "\trow: " + cell.getRow() + "\tcol: " + cell.getCol());
         }
+        else {
+            cell.setText(zero);
+            cell.setTextColor(
+                    getResources().getColor(R.color.colorZero)
+            );
+
+            updateStatus(
+                    getString(R.string.textStatus_step) + " " + cross,
+                    getResources().getColor(R.color.colorCross)
+            );
+
+            Log.v("Step", zero + "\trow: " + cell.getRow() + "\tcol: " + cell.getCol());
+        }
+        moveBuffer.add(cell);
+        move++;
+
+        isEnd();
     }
 
     public void action(int row, int col) {
@@ -333,8 +334,8 @@ public class MainActivity extends Activity {
     * enemy - враг, которого надо попытаться заблокировать (cross|zero)
     */
     public Cell scanBotOnStep(String me, String enemy, int row, int col) {
-        //Если свободен центр на втором ходе
         if (move < 3 ) {
+            //Если свободен центр на первых 2-х ходах
             if (cells[1][1].isEmpty())
                 return cells[1][1];
             else {
