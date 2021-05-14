@@ -21,16 +21,12 @@ public class MainActivity extends Activity {
 
     private int move = 1;
     private String winner = "";
-    private Cell[][] cells = new Cell[3][3];
+    private final Cell[][] cells = new Cell[3][3];
     public static String cross = "X";
     public static String zero = "0";
-    private LinkedList<Cell> moveBuffer = new LinkedList<>();
+    private final LinkedList<Cell> moveBuffer = new LinkedList<>();
 
-    private TextView textStatus;
     private Switch switchMode;
-    private ImageButton buttonPrev;
-    private Button buttonRestart;
-    private Button buttonStepBot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +45,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        buttonPrev = findViewById(R.id.buttonPrev);
+        ImageButton buttonPrev = findViewById(R.id.buttonPrev);
         buttonPrev.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -60,7 +56,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        buttonRestart = findViewById(R.id.buttonRestart);
+        Button buttonRestart = findViewById(R.id.buttonRestart);
         buttonRestart.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -71,7 +67,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        buttonStepBot = findViewById(R.id.buttonStepBot);
+        Button buttonStepBot = findViewById(R.id.buttonStepBot);
         buttonStepBot.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -82,10 +78,10 @@ public class MainActivity extends Activity {
             }
         });
 
-        textStatus = findViewById(R.id.textStatus);
-        int color = getResources().getColor(R.color.colorCross);
-        String status = getString(R.string.textStatus_step) + " " + cross;
-        updateStatus(status, color);
+        updateStatus(
+                getString(R.string.textStatus_step) + " " + cross,
+                getResources().getColor(R.color.colorCross)
+        );
 
         cells[0][0] = new Cell((Button) findViewById(R.id.buttonCell0_0), 0, 0, this);
         cells[0][1] = new Cell((Button) findViewById(R.id.buttonCell0_1), 0, 1, this);
@@ -105,6 +101,7 @@ public class MainActivity extends Activity {
     }
 
     public void updateStatus(String text, int color) {
+        TextView textStatus = findViewById(R.id.textStatus);
         textStatus.setTextColor(color);
         textStatus.setText(text);
     }
@@ -205,13 +202,9 @@ public class MainActivity extends Activity {
             cell = cells[1][1];
         else //Проверяем чей ход, чтобы определить свою сторону
             if (move % 2 != 0)
-                cell = scanBotOnStep(cross, zero,
-                        moveBuffer.getLast().getRow(),
-                        moveBuffer.getLast().getCol());
+                cell = scanBotOnStep(cross, zero);
             else
-                cell = scanBotOnStep(zero, cross,
-                        moveBuffer.getLast().getRow(),
-                        moveBuffer.getLast().getCol());
+                cell = scanBotOnStep(zero, cross);
 
         takeCell(cell);
     }
@@ -333,7 +326,7 @@ public class MainActivity extends Activity {
     * me - сторона за которую надо делать ход (cross|zero)
     * enemy - враг, которого надо попытаться заблокировать (cross|zero)
     */
-    public Cell scanBotOnStep(String me, String enemy, int row, int col) {
+    public Cell scanBotOnStep(String me, String enemy) {
         if (move < 3 ) {
             //Если свободен центр на первых 2-х ходах
             if (cells[1][1].isEmpty())
@@ -349,6 +342,8 @@ public class MainActivity extends Activity {
                 }
             }
         }
+        int row = moveBuffer.getLast().getRow();
+        int col = moveBuffer.getLast().getCol();
         try {
             //Попытка выиграть игру
             //scan rows
