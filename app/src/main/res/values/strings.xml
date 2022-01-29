@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">TicTacToeAndroid</string>
-    <string name="text_modeSwitch">Игра с ботом</string>
+    <string name="text_modeSwitch">Бот</string>
     <string name="textStatus_step">Сейчас ходит: </string>
     <string name="textStatus_draw">Ничья</string>
     <string name="textStatus_win">Победили: </string>
