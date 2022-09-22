@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,48 +34,6 @@ public class MainActivity extends Activity {
 
         switchMode = findViewById(R.id.switchMode);
         switchMode.setChecked(true);
-        switchMode.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                showToastShort(
-                        getString(R.string.switchBotOnOffToast)
-                );
-                return true;
-            }
-        });
-
-        ImageButton buttonPrev = findViewById(R.id.buttonPrev);
-        buttonPrev.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                showToastShort(
-                        getString(R.string.stepBackButtonToast)
-                );
-                return true;
-            }
-        });
-
-        Button buttonRestart = findViewById(R.id.buttonRestart);
-        buttonRestart.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                showToastShort(
-                        getString(R.string.restartButtonToast)
-                );
-                return true;
-            }
-        });
-
-        Button buttonStepBot = findViewById(R.id.buttonStepBot);
-        buttonStepBot.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                showToastShort(
-                        getString(R.string.stepBotButtonToast)
-                );
-                return true;
-            }
-        });
 
         updateStatus(
                 getString(R.string.textStatus_step) + " " + cross,
@@ -100,7 +57,7 @@ public class MainActivity extends Activity {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    public void updateStatus(String text, int color) {
+    private void updateStatus(String text, int color) {
         TextView textStatus = findViewById(R.id.textStatus);
         textStatus.setTextColor(color);
         textStatus.setText(text);
@@ -140,7 +97,40 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void takeCell(Cell cell) {
+    public void action(int row, int col) {
+        //Если игра окончена
+        if (isEnd())
+            return;
+
+        //Ход игрока
+        if (cells[row][col].isEmpty())
+            takeCell(cells[row][col]);
+        else
+            return;
+
+        //Если включена игра с ботом
+        if (switchMode.isChecked())
+            botAction(null);
+    }
+
+    //Ход бота
+    public void botAction(View view) {
+        if (isEnd())
+            return;
+
+        Cell cell;
+        if (move == 1 || move == 2 && cells[1][1].isEmpty())
+            cell = cells[1][1];
+        else //Проверяем чей ход, чтобы определить свою сторону
+            if (move % 2 != 0)
+                cell = scanBotOnStep(cross, zero);
+            else
+                cell = scanBotOnStep(zero, cross);
+
+        takeCell(cell);
+    }
+
+    private void takeCell(Cell cell) {
         if (cell == null || !cell.isEmpty())
             return;
 
@@ -176,69 +166,7 @@ public class MainActivity extends Activity {
         isEnd();
     }
 
-    public void action(int row, int col) {
-        //Если игра окончена
-        if (isEnd())
-            return;
-
-        //Ход игрока
-        if (cells[row][col].isEmpty()) {
-            takeCell(cells[row][col]);
-        } else
-            return;
-
-        //Если включена игра с ботом
-        if (switchMode.isChecked())
-            botAction(null);
-    }
-
-    //Ход бота
-    public void botAction(View view) {
-        if (isEnd())
-            return;
-
-        Cell cell;
-        if (move == 1 || move == 2 && cells[1][1].isEmpty())
-            cell = cells[1][1];
-        else //Проверяем чей ход, чтобы определить свою сторону
-            if (move % 2 != 0)
-                cell = scanBotOnStep(cross, zero);
-            else
-                cell = scanBotOnStep(zero, cross);
-
-        takeCell(cell);
-    }
-
-    //Проверка линии на нахождение победной комбинации
-    public void checkLineOnWin(int xStart,
-                               int yStart,
-                               int xStep,
-                               int yStep) throws GotWinnerException {
-        int count = 1;
-        Cell saved = cells[yStart][xStart];
-        int i = yStart + yStep;
-        int j = xStart + xStep;
-
-        while (i < 3 && j < 3 && i >= 0 && j >= 0) {
-            Cell cell = cells[i][j];
-            //Если встретилась последовательность одинаковых непустых ячеек
-            if (saved.equals(cell) && !saved.isEmpty())
-                count++;
-            //Если они отличаются
-            else {
-                saved = cell;
-                count = 1;
-            }
-            //Если победная комбинация, то вызываем exception с данными победителя
-            if (count == 3)
-                throw new GotWinnerException(saved.getText());
-
-            i += yStep;
-            j += xStep;
-        }
-    }
-
-    public boolean isEnd() {
+    private boolean isEnd() {
         if (!winner.isEmpty())
             return true;
 
@@ -277,6 +205,32 @@ public class MainActivity extends Activity {
         return false;
     }
 
+    //Проверка линии на нахождение победной комбинации
+    private void checkLineOnWin(int xStart, int yStart, int xStep, int yStep) throws GotWinnerException {
+        int count = 1;
+        Cell saved = cells[yStart][xStart];
+        int i = yStart + yStep;
+        int j = xStart + xStep;
+
+        while (i < 3 && j < 3 && i >= 0 && j >= 0) {
+            Cell cell = cells[i][j];
+            //Если встретилась последовательность одинаковых непустых ячеек
+            if (saved.equals(cell) && !saved.isEmpty())
+                count++;
+                //Если они отличаются
+            else {
+                saved = cell;
+                count = 1;
+            }
+            //Если победная комбинация, то вызываем exception с данными победителя
+            if (count == 3)
+                throw new GotWinnerException(saved.getText());
+
+            i += yStep;
+            j += xStep;
+        }
+    }
+
     /*
      * Функция проверяет линию на возможность хода
      * xStart - координата начала линии по X
@@ -286,13 +240,7 @@ public class MainActivity extends Activity {
      * player - тип подсчитываемых последовательных ячеек(cross|zero)
      * countEmpty - количество пустых клеток
      */
-    public void scanLineOnStep(int xStart,
-                               int yStart,
-                               int xStep,
-                               int yStep,
-                               int count,
-                               String player,
-                               int countEmpty) throws GotCellToStepException{
+    private void scanLineOnStep(int xStart, int yStart, int xStep, int yStep, int count, String player, int countEmpty) throws GotCellToStepException{
         int k = 0;
         int kEmpty = 0;
         Cell result = null;
@@ -313,9 +261,8 @@ public class MainActivity extends Activity {
                 kEmpty = 0;
             }
             //Если найдена оптимальная ячейка для хода, то возвращаем ее
-            if (k == count && result != null && kEmpty == countEmpty) {
+            if (k == count && result != null && kEmpty == countEmpty)
                 throw new GotCellToStepException(result);
-            }
             i += yStep;
             j += xStep;
         }
@@ -326,7 +273,7 @@ public class MainActivity extends Activity {
     * me - сторона за которую надо делать ход (cross|zero)
     * enemy - враг, которого надо попытаться заблокировать (cross|zero)
     */
-    public Cell scanBotOnStep(String me, String enemy) {
+    private Cell scanBotOnStep(String me, String enemy) {
         if (move < 3 ) {
             //Если свободен центр на первых 2-х ходах
             if (cells[1][1].isEmpty())
@@ -347,13 +294,11 @@ public class MainActivity extends Activity {
         try {
             //Попытка выиграть игру
             //scan rows
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 3; i++)
                 scanLineOnStep(0, i, 1, 0, 2, me, 1);
-            }
             //scan columns
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 3; i++)
                 scanLineOnStep(i, 0, 0, 1, 2, me, 1);
-            }
             //scan left diagonal
             scanLineOnStep(0, 0, 1, 1, 2, me, 1);
             //scan right diagonal
@@ -376,13 +321,11 @@ public class MainActivity extends Activity {
                 //scan right diagonal
                 scanLineOnStep(2, 0, -1, 1, 1, me, j);
                 //scan columns
-                for (int i = 0; i < 3; i++) {
+                for (int i = 0; i < 3; i++)
                     scanLineOnStep(i, 0, 0, 1, 1, me, j);
-                }
                 //scan rows
-                for (int i = 0; i < 3; i++) {
+                for (int i = 0; i < 3; i++)
                     scanLineOnStep(0, i, 1, 0, 1, me, j);
-                }
             }
         } catch (GotCellToStepException e) {
             return e.getCell();
